@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/Shaders">
         <file alias="basicShader.fsh">data/basicShader.fsh</file>
+        <file alias="basicShader.vsh">data/basicVertexShader.vsh</file>
     </qresource>
     <qresource prefix="/Inputs">
         <file alias="squirrel.jpg">data/squirrel.jpg</file>

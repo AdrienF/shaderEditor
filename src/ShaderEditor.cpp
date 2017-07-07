@@ -205,6 +205,7 @@ void ShaderEditor::keyPressEvent(QKeyEvent *event)
             emit requestShaderValidation(document()->toPlainText());
             break;
         default:
+            QPlainTextEdit::keyPressEvent(event);
             break;
         }
     }

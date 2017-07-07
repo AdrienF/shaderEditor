@@ -13,7 +13,7 @@ ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
     QIcon icon(":/Icons/croissant.png");
     setWindowIcon(icon);
 
-    m_editor->resize(1024, 512);
+    m_editor->resize(512, 1024);
 
     connect(m_editor.get(), SIGNAL(requestShaderValidation(QString)),
             static_cast<RenderWidget*>(m_renderer.get()), SLOT(rebuildShader(QString)));
@@ -22,7 +22,7 @@ ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
     format.setSamples(16);
     m_renderer->setFormat(format);
     m_renderer->resize(640, 480);
-//    m_renderer->setAnimating(true);
+    m_renderer->setAnimating(true);
 }
 
 void ShaderEditorApp::openDocument(const QString &filename)

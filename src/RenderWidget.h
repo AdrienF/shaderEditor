@@ -14,9 +14,15 @@ public:
     void render() Q_DECL_OVERRIDE;
 
 private:
+
+    static QString attributes() ;
+
     GLuint m_posAttr;
     GLuint m_colAttr;
     GLuint m_matrixUniform;
+
+    GLuint m_widthUniform;
+    GLuint m_heightUniform;
 
     QString m_vertexShader;
     QString m_fragmentShader;
