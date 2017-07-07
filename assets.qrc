@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/Shaders">
+        <file alias="basicShader.fsh">data/basicShader.fsh</file>
+    </qresource>
+    <qresource prefix="/Inputs">
+        <file alias="squirrel.jpg">data/squirrel.jpg</file>
+    </qresource>
+    <qresource prefix="/Icons">
+        <file alias="croissant.png">data/croissant.png</file>
+    </qresource>
+</RCC>
