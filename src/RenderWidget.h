@@ -3,6 +3,7 @@
 
 #include <QWindow>
 #include <QOpenGLShaderProgram>
+#include <QDateTime>
 #include "openglwindow.h"
 
 class RenderWidget : public OpenGLWindow
@@ -17,12 +18,23 @@ private:
 
     //The shader code block declaring all defaults uniforms
     static QString attributes() ;
+    //In shaderToy the entry point could optionally be mainImage, mainSound, mainVR
+    QString formatFromShaderToy(const QString& content);
     //Get the default uniforms id
     void getUniforms();
     //Update uniform values
     void updateUniforms();
     //Set the default uniforms values
     void setUniforms();
+
+    //timer
+    QDate m_date;
+    QTime m_timer;
+
+    //mouse position
+    const qreal m_retinaScale;
+    QPointF m_mousePressedPos;
+    QPointF m_mouseCurrentPos;
 
     //vertex shader uniforms
     GLuint m_posAttr;
@@ -82,6 +94,9 @@ private:
 public slots:
     //Shader code content has changed, need to rebuild the program
     void rebuildShader(QString content);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 };
 
 #endif // RENDERWIDGET_H
