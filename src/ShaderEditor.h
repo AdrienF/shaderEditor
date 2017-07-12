@@ -35,11 +35,16 @@ public:
     ~ShaderEditor();
 
     void openFile(const QString &fileName);
+    void setDocumentName(const QString& docName);
+    const QString& documentName() const {return m_filename;}
 
     void setDefinition(const QString &defName);
 
 signals:
     void requestShaderValidation(QString);
+    void saveDocument();
+    void saveDocumentAs();
+    void openNewDocument();
 
 protected:
     void contextMenuEvent(QContextMenuEvent *event) Q_DECL_OVERRIDE;
@@ -54,6 +59,7 @@ private:
     void updateSidebarGeometry();
     void updateSidebarArea(const QRect &rect, int dy);
     void highlightCurrentLine();
+    void highlightErrorLines(QVector<int>);
 
 
     QTextBlock blockAtPosition(int y) const;
@@ -64,6 +70,7 @@ private:
      KSyntaxHighlighting::Repository m_repository;
      KSyntaxHighlighting::SyntaxHighlighter *m_highlighter;
      CodeEditorSidebar *m_sideBar;
+     QString m_filename;
 };
 
 #endif // SHADEREDITOR_H

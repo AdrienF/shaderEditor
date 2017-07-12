@@ -109,13 +109,24 @@ void ShaderEditor::openFile(const QString& fileName)
 
     clear();
 
-    const auto def = m_repository.definitionForFileName(fileName);
+    m_filename = fileName;
+
+    const auto def = m_repository.definitionForName("GLSL");
     m_highlighter->setDefinition(def);
 
     setWindowTitle(fileName);
     setPlainText(QString::fromUtf8(f.readAll()));
+    f.close();
+
+    //rebuild program
+    emit requestShaderValidation(document()->toPlainText());
 }
 
+void ShaderEditor::setDocumentName(const QString& docName)
+{
+    m_filename = docName;
+    setWindowTitle(m_filename);
+}
 
 void ShaderEditor::setDefinition(const QString &defName)
 {
@@ -196,13 +207,23 @@ void ShaderEditor::resizeEvent(QResizeEvent *event)
 
 void ShaderEditor::keyPressEvent(QKeyEvent *event)
 {
-    if(Qt::ControlModifier==event->modifiers())
+    if(Qt::ControlModifier & event->modifiers())
     {
         switch(event->key())
         {
         case Qt::Key_B:
-            qDebug() << "Build shader";
             emit requestShaderValidation(document()->toPlainText());
+            break;
+        case Qt::Key_S:
+            if(Qt::ShiftModifier & event->modifiers())
+            {
+                emit saveDocumentAs();
+            }else{
+                emit saveDocument();
+            }
+            break;
+        case Qt::Key_O:
+            emit openNewDocument();
             break;
         default:
             QPlainTextEdit::keyPressEvent(event);
@@ -315,6 +336,12 @@ void ShaderEditor::highlightCurrentLine()
     QList<QTextEdit::ExtraSelection> extraSelections;
     extraSelections.append(selection);
     setExtraSelections(extraSelections);
+}
+
+
+void ShaderEditor::highlightErrorLines(QVector<int> faultLines)
+{
+    //TODO
 }
 
 QTextBlock ShaderEditor::blockAtPosition(int y) const

@@ -15,6 +15,10 @@ public:
 
     void openDocument(const QString &filename);
 
+private slots:
+    void saveDocument();
+    void saveDocumentAs();
+
 private:
     std::unique_ptr<ShaderEditor> m_editor;
     std::unique_ptr<RenderWidget> m_renderer;
