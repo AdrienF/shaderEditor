@@ -94,7 +94,6 @@ void UIShaderEditor::updateTex(int i)
                                                     tr("Image (*.png *.jpg *.jpeg)"));
     if(fileName != m_textureRep.at(i).path)
     {
-        qDebug() << i << fileName;
         ImageRep &rep = m_textureRep[i];
         rep.path = fileName;
         rep.img  = QImage(fileName);

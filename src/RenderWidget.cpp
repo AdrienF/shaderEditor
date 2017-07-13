@@ -74,7 +74,6 @@ RenderWidget::RenderWidget()
 void RenderWidget::rebuildShader(QString content)
 {
     m_fragmentShader = attributes() + formatFromShaderToy( content );
-    qDebug() << m_fragmentShader;
     initialize();
 }
 
@@ -306,17 +305,14 @@ void RenderWidget::mousePressEvent(QMouseEvent *event)
 {
    m_mousePressedPos = event->localPos() * m_retinaScale;
    m_mouseCurrentPos =  m_mousePressedPos ;
-   qDebug() << m_mousePressedPos;
 }
 
 void RenderWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-//    m_mousePressedPos = m_mouseCurrentPos;
 }
 
 void RenderWidget::updateTexture(int idx, QImage img)
 {
-    qDebug() << "Update texture" << idx;
     m_iTextures[idx].reset( new QOpenGLTexture(QOpenGLTexture::Target2D) );
 
     // set bilinear filtering mode for texture magnification and minification
