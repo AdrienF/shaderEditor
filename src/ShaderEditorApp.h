@@ -21,7 +21,6 @@ private slots:
     void saveDocumentAs();
 
 private:
-//    std::unique_ptr<ShaderEditor> m_editor;
     std::unique_ptr<RenderWidget> m_renderer;
     std::unique_ptr<UIShaderEditor> m_editor;
 };

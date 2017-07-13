@@ -38,6 +38,8 @@ RenderWidget::RenderWidget()
     , m_retinaScale (devicePixelRatio())
 {
 
+    m_iChannel.resize(4);   //up to 4 input textures
+    m_iTextures.resize(4);
     m_iChannelTime[0] = 0;
     m_iChannelTime[1] = 0;
     m_iChannelTime[2] = 0;
@@ -91,10 +93,13 @@ QString RenderWidget::attributes()
     s += "uniform float	iTimeDelta;";       // image/buffer	Time it takes to render a frame, in seconds
     s += "uniform int	iFrame;";           // image/buffer	Current frame
     s += "uniform float	iFrameRate;";       // image/buffer	Number of frames rendered per second
+    s += "uniform vec4	iMouse;";           // image/buffer	xy = current pixel coords (if LMB is down). zw = click pixel
+    s += "uniform sampler2D iChannel0;";  // image/buffer/sound	Sampler for input textures i
+    s += "uniform sampler2D iChannel1;";  // image/buffer/sound	Sampler for input textures i
+    s += "uniform sampler2D iChannel2;";  // image/buffer/sound	Sampler for input textures i
+    s += "uniform sampler2D iChannel3;";  // image/buffer/sound	Sampler for input textures i
     //s += "uniform float	iChannelTime[4];";  // image/buffer	Time for channel (if video or sound), in seconds
     //s += "uniform vec3	iChannelResolution[4];";   // image/buffer/sound	Input texture resolution for each channel
-    s += "uniform vec4	iMouse;";           // image/buffer	xy = current pixel coords (if LMB is down). zw = click pixel
-    //s += "uniform sampler2D iChannel{i};";  // image/buffer/sound	Sampler for input textures i
     //s += "uniform vec4	iDate;";            // image/buffer/sound	Year, month, day, time in seconds in .xyzw
     //s += "uniform float	iSampleRate;";      // image/buffer/sound	The sound sample rate (typically 44100)
 
@@ -187,7 +192,11 @@ void RenderWidget::getUniforms()
     m_iGlobalTimeUniform = m_program->uniformLocation("iGlobalTime");;
     m_iTimeDeltaUniform = m_program->uniformLocation("iTimeDelta");;
     m_iFrameUniform = m_program->uniformLocation("iFrame");;
-    m_iFrameRateUniform = m_program->uniformLocation("iFrameRate");;
+    m_iFrameRateUniform = m_program->uniformLocation("iFrameRate");
+    for(int i=0; i<4; ++i)
+    {
+        m_iChannel[i] = m_program->uniformLocation(QString("iChannel%1").arg(i));
+    }
     //m_iChannelTimeUniform = m_program->uniformLocation("iChannelTime");;
     //m_iChannelResolutionUniform = m_program->uniformLocation("iChannelResolution");;
     m_iMouseUniform = m_program->uniformLocation("iMouse");;
@@ -216,6 +225,14 @@ void RenderWidget::setUniforms()
     m_program->setUniformValue(m_iGlobalTimeUniform,  m_iGlobalTime);
     m_program->setUniformValue(m_iFrameRateUniform,  m_iFrameRate);
 
+    for(int i=0; i<m_iTextures.size(); ++i){
+        auto &tex = m_iTextures[i];
+        if(tex)
+        {
+            m_program->setUniformValue(m_iChannel[i],  i);
+        }
+    }
+
     vec4 mouseValue;
     mouseValue.x = m_mouseCurrentPos.x();
     mouseValue.y = m_iResolution.y - m_mouseCurrentPos.y();
@@ -235,6 +252,15 @@ void RenderWidget::render()
 
     m_program->bind();
 
+    for(int i=0; i<4; ++i)
+    {
+        auto &tex = m_iTextures.at(i);
+        if(tex)
+        {
+            glActiveTexture(GL_TEXTURE0 + i);
+            tex->bind();
+        }
+    }
     updateUniforms();
     setUniforms();
 
@@ -257,6 +283,7 @@ void RenderWidget::render()
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -285,4 +312,20 @@ void RenderWidget::mousePressEvent(QMouseEvent *event)
 void RenderWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 //    m_mousePressedPos = m_mouseCurrentPos;
+}
+
+void RenderWidget::updateTexture(int idx, QImage img)
+{
+    qDebug() << "Update texture" << idx;
+    m_iTextures[idx].reset( new QOpenGLTexture(QOpenGLTexture::Target2D) );
+
+    // set bilinear filtering mode for texture magnification and minification
+    m_iTextures[idx]->setMinificationFilter(QOpenGLTexture::Linear);
+    m_iTextures[idx]->setMagnificationFilter(QOpenGLTexture::Linear);
+
+    // set the wrap mode
+    m_iTextures[idx]->setWrapMode(QOpenGLTexture::Repeat);
+
+    //transfer image data to server side
+    m_iTextures[idx]->setData(img.mirrored(), QOpenGLTexture::MipMapGeneration::DontGenerateMipMaps);
 }

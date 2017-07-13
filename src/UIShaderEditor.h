@@ -27,15 +27,29 @@ public slots:
     void updateFPS(float);
     void updateGlobalTime(float);
 
+private slots:
+    void on_pushButtonTex_0_pressed();
+    void on_pushButtonTex_1_pressed();
+    void on_pushButtonTex_2_pressed();
+    void on_pushButtonTex_3_pressed();
+
 signals:
     void requestShaderValidation(QString);
+    void updateTexture(int, QImage);
 
 private:
+    struct ImageRep{
+        QString path;
+        QImage  img;
+        QIcon   icon;
+    };
     Ui::UIShaderEditor *ui;
     QString m_filename;
     QVector<RenderWidget::ErrorLog> m_errorLines;
+    QVector<ImageRep> m_textureRep;
 
     void updateErrLog();
+    void updateTex(int i);
 };
 
 #endif // UISHADEREDITOR_H

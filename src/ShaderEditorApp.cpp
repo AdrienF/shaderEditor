@@ -35,6 +35,7 @@ ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
     });
     connect(m_renderer.get(), &RenderWidget::sendFPS,           m_editor.get(), &UIShaderEditor::updateFPS);
     connect(m_renderer.get(), &RenderWidget::sendGlobalTime,    m_editor.get(), &UIShaderEditor::updateGlobalTime);
+    connect(m_editor.get(),   &UIShaderEditor::updateTexture,   m_renderer.get(), &RenderWidget::updateTexture);
 
     QSurfaceFormat format;
     format.setSamples(16);

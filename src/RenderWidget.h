@@ -3,6 +3,7 @@
 
 #include <QWindow>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
 #include <QDateTime>
 #include <QTimer>
 #include "openglwindow.h"
@@ -68,9 +69,10 @@ private:
     GLuint m_iChannelTimeUniform[4];
     GLuint m_iChannelResolutionUniform[4];
     GLuint m_iMouseUniform;
-    //GLuint m_iChannel{i};
     GLuint m_iDateUniform;
     GLuint m_iSampleRateUniform;
+    QVector<GLuint> m_iChannel;
+    std::vector<std::unique_ptr<QOpenGLTexture>> m_iTextures;
 
     //Shader text code
     QString m_vertexShader;
@@ -114,6 +116,8 @@ public slots:
     void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void updateTexture(int idx, QImage img);
+
 signals:
     void buildFailed();
     void buildSuccess();
