@@ -60,6 +60,13 @@ RenderWidget::RenderWidget()
 
     m_date = QDate::currentDate();
 
+    // A timer to send regular info to UI
+    m_eventTimer.reset(new QTimer(this));
+    connect(m_eventTimer.get(), &QTimer::timeout, [this](){
+        emit sendFPS(m_iFrameRate);
+        emit sendGlobalTime(m_iGlobalTime);
+    });
+    m_eventTimer->start(100);
 }
 
 void RenderWidget::rebuildShader(QString content)
@@ -69,6 +76,11 @@ void RenderWidget::rebuildShader(QString content)
     initialize();
 }
 
+//return the number of lines of code that have been prepended to the shader displayed in editor
+int RenderWidget::headerOffset() const
+{
+    return attributes().count('\n') + 1 ;
+}
 
 QString RenderWidget::attributes()
 {
@@ -111,6 +123,28 @@ QString RenderWidget::formatFromShaderToy(const QString& content)
     return res;
 }
 
+QVector<RenderWidget::ErrorLog> RenderWidget::parseLog() const
+{
+    const QString log = m_program->log();
+    const int offset = headerOffset();
+    QVector<ErrorLog>res;
+    QStringList lines = log.split('\n');
+    for(const auto & line : lines)
+    {
+        if(line.contains("ERROR"))
+        {
+            ErrorLog errLog;
+            QStringList blocks = line.split(':');
+            errLog.level = GLSL_ERROR;
+            errLog.row = blocks.at(2).toUInt() - offset;
+            errLog.col = 0;//blocks.at(1).at(1).toUInt();
+            errLog.log = blocks.back();
+            res.push_back(errLog);
+        }
+    }
+    return res;
+}
+
 void RenderWidget::initialize()
 {
     m_program.reset( new QOpenGLShaderProgram(this) );
@@ -126,6 +160,7 @@ void RenderWidget::initialize()
         qWarning().noquote() << "Can't compile fragment shader";
         qWarning().noquote() << "Source:" << endl << m_fragmentShader;
         qWarning().noquote() << "Log:" << endl << m_program->log();
+        emit buildFailed();
         return;
     }
     if(!m_program->link())
@@ -134,9 +169,11 @@ void RenderWidget::initialize()
         qWarning().noquote() << "Log:" << endl << m_program->log();
         return;
     }
+    emit buildSuccess();
     getUniforms();
     m_timer.restart();
 }
+
 //! [4]
 
 void RenderWidget::getUniforms()
@@ -164,12 +201,10 @@ void RenderWidget::updateUniforms()
     ++m_iFrame;
 
     float elapsedSec = ( m_timer.elapsed() ) / (1000.);
-    float deltaSec   = ( elapsedSec -m_iGlobalTime )/1000.;
+    float deltaSec   = ( elapsedSec -m_iGlobalTime );
     m_iGlobalTime    = elapsedSec;
     m_iTimeDelta     = deltaSec;
     m_iFrameRate     = 1./deltaSec;
-
-
 }
 
 void RenderWidget::setUniforms()
@@ -244,8 +279,10 @@ void RenderWidget::mousePressEvent(QMouseEvent *event)
 {
    m_mousePressedPos = event->localPos() * m_retinaScale;
    m_mouseCurrentPos =  m_mousePressedPos ;
+   qDebug() << m_mousePressedPos;
 }
 
 void RenderWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+//    m_mousePressedPos = m_mouseCurrentPos;
 }

@@ -4,6 +4,7 @@
 #include <QWindow>
 #include <QOpenGLShaderProgram>
 #include <QDateTime>
+#include <QTimer>
 #include "openglwindow.h"
 
 class RenderWidget : public OpenGLWindow
@@ -14,10 +15,25 @@ public:
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
 
+    enum ErrorLevel{
+        GLSL_WARNING = 0,
+        GLSL_ERROR = 1
+    };
+    struct ErrorLog{
+        ErrorLevel level;
+        int row;
+        int col;
+        QString log;
+    };
+    //Return the line index (first) and column (second) of lines with errors
+    QVector<ErrorLog> parseLog() const ;
+
 private:
 
     //The shader code block declaring all defaults uniforms
     static QString attributes() ;
+    //Size (in lines) of the header
+    int headerOffset() const ;
     //In shaderToy the entry point could optionally be mainImage, mainSound, mainVR
     QString formatFromShaderToy(const QString& content);
     //Get the default uniforms id
@@ -30,6 +46,7 @@ private:
     //timer
     QDate m_date;
     QTime m_timer;
+    std::unique_ptr<QTimer> m_eventTimer;
 
     //mouse position
     const qreal m_retinaScale;
@@ -94,9 +111,14 @@ private:
 public slots:
     //Shader code content has changed, need to rebuild the program
     void rebuildShader(QString content);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+signals:
+    void buildFailed();
+    void buildSuccess();
+    void sendFPS(float);
+    void sendGlobalTime(float);
 };
 
 #endif // RENDERWIDGET_H

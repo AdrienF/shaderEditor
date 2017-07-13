@@ -7,45 +7,48 @@
 
 ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
     : QApplication(argc, argv)
-    , m_editor(new ShaderEditor())
     , m_renderer(new RenderWidget())
+    , m_editor(new UIShaderEditor())
 {
 
     QIcon icon(":/Icons/croissant.png");
     setWindowIcon(icon);
 
-    m_editor->resize(512, 1024);
+    ShaderEditor *actualEditor = m_editor->editor();
 
-    connect(m_editor.get(), SIGNAL(requestShaderValidation(QString)),
-            static_cast<RenderWidget*>(m_renderer.get()), SLOT(rebuildShader(QString)));
-
-    connect(m_editor.get(), SIGNAL(saveDocument()),
-            this, SLOT(saveDocument()));
-    connect(m_editor.get(), SIGNAL(saveDocumentAs()),
-            this, SLOT(saveDocumentAs()));
-    connect(m_editor.get(), &ShaderEditor::openNewDocument,
-            [this](){
+    connect(m_editor.get(), &UIShaderEditor::requestShaderValidation,  m_renderer.get(), &RenderWidget::rebuildShader);
+    connect(actualEditor, &ShaderEditor::saveDocument,      this, &ShaderEditorApp::saveDocument);
+    connect(actualEditor, &ShaderEditor::saveDocumentAs,    this, &ShaderEditorApp::saveDocumentAs);
+    connect(actualEditor, &ShaderEditor::openNewDocument,   [this](){
         QDir d(this->m_editor->documentName());
         QString defaultDir = d.absolutePath();
-        QString fileName = QFileDialog::getOpenFileName(m_editor.get(), tr("Open File"),
-                                     defaultDir,
-                                     tr("Fragment shader (*.fsh *.glsl *.frag)"));
-        m_editor->openFile(fileName);
+        QString fileName = QFileDialog::getOpenFileName(this->m_editor->editor(), tr("Open File"),
+                                                        defaultDir,
+                                                        tr("Fragment shader (*.fsh *.glsl *.frag)"));
+        this->m_editor->openFile(fileName);
     });
+    connect(m_renderer.get(), &RenderWidget::buildFailed,   [this](){
+        this->m_editor->setErrorLines(this->m_renderer->parseLog());
+    });
+    connect(m_renderer.get(), &RenderWidget::buildSuccess,   [this](){
+        this->m_editor->setErrorLines(this->m_renderer->parseLog());
+    });
+    connect(m_renderer.get(), &RenderWidget::sendFPS,           m_editor.get(), &UIShaderEditor::updateFPS);
+    connect(m_renderer.get(), &RenderWidget::sendGlobalTime,    m_editor.get(), &UIShaderEditor::updateGlobalTime);
 
     QSurfaceFormat format;
     format.setSamples(16);
     m_renderer->setFormat(format);
     m_renderer->resize(640, 480);
     m_renderer->setAnimating(true);
+
+    m_editor->show();
+    m_renderer->show();
 }
 
 void ShaderEditorApp::openDocument(const QString &filename)
 {
     m_editor->openFile(filename);
-    m_editor->show();
-
-    m_renderer->show();
 }
 
 
@@ -62,7 +65,7 @@ void ShaderEditorApp::saveDocument()
         qWarning() << "Failed to save" << filename << ":" << f.errorString();
         return;
     }
-    f.write(m_editor->document()->toPlainText().toStdString().c_str());
+    f.write(m_editor->editor()->document()->toPlainText().toStdString().c_str());
     f.close();
 }
 
@@ -86,7 +89,7 @@ void ShaderEditorApp::saveDocumentAs()
         qWarning() << "Failed to save" << fileName << ":" << f.errorString();
         return;
     }
-    f.write(m_editor->document()->toPlainText().toStdString().c_str());
+    f.write(m_editor->editor()->document()->toPlainText().toStdString().c_str());
     f.close();
 
     if(fileName != m_editor->documentName())

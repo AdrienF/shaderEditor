@@ -1,0 +1,11 @@
+== File managmenemt
+
+==ShaderToy lib
+- browse shader toy catalog
+- import shader from ShaderToy
+
+== OpenGL management
+- input Textures
+
+== Other
+- remove RenderWidget inclusion (create some shaderValidator class w/ ErrorLog struct)

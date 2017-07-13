@@ -22,6 +22,9 @@
 #include <QPlainTextEdit>
 #include <KF5/KSyntaxHighlighting/repository.h>
 
+//TODO : should be removed
+#include "RenderWidget.h"
+
 namespace KSyntaxHighlighting {
 class SyntaxHighlighter;
 }
@@ -35,10 +38,9 @@ public:
     ~ShaderEditor();
 
     void openFile(const QString &fileName);
-    void setDocumentName(const QString& docName);
-    const QString& documentName() const {return m_filename;}
 
     void setDefinition(const QString &defName);
+    void setErrorLines(QVector<RenderWidget::ErrorLog>);
 
 signals:
     void requestShaderValidation(QString);
@@ -58,19 +60,18 @@ private:
     void sidebarPaintEvent(QPaintEvent *event);
     void updateSidebarGeometry();
     void updateSidebarArea(const QRect &rect, int dy);
-    void highlightCurrentLine();
-    void highlightErrorLines(QVector<int>);
-
+    void highlightLines();
+    QList<QTextEdit::ExtraSelection> highlightErrorLines();
 
     QTextBlock blockAtPosition(int y) const;
     bool isFoldable(const QTextBlock &block) const;
     bool isFolded(const QTextBlock &block) const;
     void toggleFold(const QTextBlock &block);
 
-     KSyntaxHighlighting::Repository m_repository;
-     KSyntaxHighlighting::SyntaxHighlighter *m_highlighter;
-     CodeEditorSidebar *m_sideBar;
-     QString m_filename;
+    KSyntaxHighlighting::Repository m_repository;
+    KSyntaxHighlighting::SyntaxHighlighter *m_highlighter;
+    CodeEditorSidebar *m_sideBar;
+    QVector<RenderWidget::ErrorLog> m_errorLines;
 };
 
 #endif // SHADEREDITOR_H

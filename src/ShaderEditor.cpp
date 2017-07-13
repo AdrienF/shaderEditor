@@ -89,10 +89,10 @@ ShaderEditor::ShaderEditor(QWidget *parent) :
 
     connect(this, &QPlainTextEdit::blockCountChanged, this, &ShaderEditor::updateSidebarGeometry);
     connect(this, &QPlainTextEdit::updateRequest, this, &ShaderEditor::updateSidebarArea);
-    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &ShaderEditor::highlightCurrentLine);
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &ShaderEditor::highlightLines);
 
     updateSidebarGeometry();
-    highlightCurrentLine();
+    highlightLines();
 }
 
 ShaderEditor::~ShaderEditor()
@@ -109,29 +109,27 @@ void ShaderEditor::openFile(const QString& fileName)
 
     clear();
 
-    m_filename = fileName;
-
-    const auto def = m_repository.definitionForName("GLSL");
-    m_highlighter->setDefinition(def);
-
-    setWindowTitle(fileName);
     setPlainText(QString::fromUtf8(f.readAll()));
     f.close();
 
+    const auto def = m_repository.definitionForName("GLSL");
+    m_highlighter->setDefinition(def);
+    m_errorLines.clear();
+
     //rebuild program
     emit requestShaderValidation(document()->toPlainText());
-}
-
-void ShaderEditor::setDocumentName(const QString& docName)
-{
-    m_filename = docName;
-    setWindowTitle(m_filename);
 }
 
 void ShaderEditor::setDefinition(const QString &defName)
 {
     const auto def = m_repository.definitionForName(defName);
     m_highlighter->setDefinition(def);
+}
+
+void ShaderEditor::setErrorLines(QVector<RenderWidget::ErrorLog> errLines)
+{
+    m_errorLines = errLines;
+    highlightLines();
 }
 
 void ShaderEditor::contextMenuEvent(QContextMenuEvent *event)
@@ -146,36 +144,38 @@ void ShaderEditor::contextMenuEvent(QContextMenuEvent *event)
     });
 
     // syntax selection
-    auto hlActionGroup = new QActionGroup(menu);
-    hlActionGroup->setExclusive(true);
-    auto hlGroupMenu = menu->addMenu(QStringLiteral("Syntax"));
-    auto noHlAction = hlGroupMenu->addAction(QStringLiteral("None"));
-    noHlAction->setCheckable(true);
-    hlActionGroup->addAction(noHlAction);
-    noHlAction->setChecked(!m_highlighter->definition().isValid());
-    QMenu *hlSubMenu = nullptr;
-    QString currentGroup;
-    foreach (const auto &def, m_repository.definitions()) {
-        if (def.isHidden())
-            continue;
-        if (currentGroup != def.section()) {
-            currentGroup = def.section();
-            hlSubMenu = hlGroupMenu->addMenu(def.translatedSection());
-        }
+    if(0){
+        auto hlActionGroup = new QActionGroup(menu);
+        hlActionGroup->setExclusive(true);
+        auto hlGroupMenu = menu->addMenu(QStringLiteral("Syntax"));
+        auto noHlAction = hlGroupMenu->addAction(QStringLiteral("None"));
+        noHlAction->setCheckable(true);
+        hlActionGroup->addAction(noHlAction);
+        noHlAction->setChecked(!m_highlighter->definition().isValid());
+        QMenu *hlSubMenu = nullptr;
+        QString currentGroup;
+        foreach (const auto &def, m_repository.definitions()) {
+            if (def.isHidden())
+                continue;
+            if (currentGroup != def.section()) {
+                currentGroup = def.section();
+                hlSubMenu = hlGroupMenu->addMenu(def.translatedSection());
+            }
 
-        Q_ASSERT(hlSubMenu);
-        auto action = hlSubMenu->addAction(def.translatedName());
-        action->setCheckable(true);
-        action->setData(def.name());
-        hlActionGroup->addAction(action);
-        if (def.name() == m_highlighter->definition().name())
-            action->setChecked(true);
+            Q_ASSERT(hlSubMenu);
+            auto action = hlSubMenu->addAction(def.translatedName());
+            action->setCheckable(true);
+            action->setData(def.name());
+            hlActionGroup->addAction(action);
+            if (def.name() == m_highlighter->definition().name())
+                action->setChecked(true);
+        }
+        connect(hlActionGroup, &QActionGroup::triggered, this, [this](QAction *action) {
+            const auto defName = action->data().toString();
+            const auto def = m_repository.definitionForName(defName);
+            m_highlighter->setDefinition(def);
+        });
     }
-    connect(hlActionGroup, &QActionGroup::triggered, this, [this](QAction *action) {
-        const auto defName = action->data().toString();
-        const auto def = m_repository.definitionForName(defName);
-        m_highlighter->setDefinition(def);
-    });
 
     // theme selection
     auto themeGroup = new QActionGroup(menu);
@@ -212,6 +212,8 @@ void ShaderEditor::keyPressEvent(QKeyEvent *event)
         switch(event->key())
         {
         case Qt::Key_B:
+            m_errorLines.clear();
+            highlightLines();
             emit requestShaderValidation(document()->toPlainText());
             break;
         case Qt::Key_S:
@@ -246,7 +248,7 @@ void ShaderEditor::setTheme(const KSyntaxHighlighting::Theme &theme)
 
     m_highlighter->setTheme(theme);
     m_highlighter->rehighlight();
-    highlightCurrentLine();
+    highlightLines();
 }
 
 int ShaderEditor::sidebarWidth() const
@@ -325,7 +327,7 @@ void ShaderEditor::updateSidebarArea(const QRect& rect, int dy)
         m_sideBar->update(0, rect.y(), m_sideBar->width(), rect.height());
 }
 
-void ShaderEditor::highlightCurrentLine()
+void ShaderEditor::highlightLines()
 {
     QTextEdit::ExtraSelection selection;
     selection.format.setBackground(QColor(m_highlighter->theme().editorColor(KSyntaxHighlighting::Theme::CurrentLine)));
@@ -333,15 +335,37 @@ void ShaderEditor::highlightCurrentLine()
     selection.cursor = textCursor();
     selection.cursor.clearSelection();
 
-    QList<QTextEdit::ExtraSelection> extraSelections;
+    QList<QTextEdit::ExtraSelection> extraSelections ;
     extraSelections.append(selection);
+    if(!m_errorLines.isEmpty())
+        extraSelections.append(highlightErrorLines());
+
     setExtraSelections(extraSelections);
 }
 
-
-void ShaderEditor::highlightErrorLines(QVector<int> faultLines)
+QList<QTextEdit::ExtraSelection> ShaderEditor::highlightErrorLines()
 {
-    //TODO
+    QTextEdit::ExtraSelection selection;
+    selection.format.setBackground(QColor(m_highlighter->theme().editorColor(KSyntaxHighlighting::Theme::MarkError)));
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+
+    QList<QTextEdit::ExtraSelection> extraSelections;
+    QTextCursor cursor = textCursor();
+
+    //for each error line, set the cursor and append to the selection;
+    for(const auto& errLine : m_errorLines)
+    {
+        //reset position
+        cursor.movePosition(QTextCursor::Start);
+        cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, errLine.row - 1);
+
+        selection.cursor = cursor;
+        selection.cursor.clearSelection();
+
+        extraSelections.append(selection);
+    }
+
+    return extraSelections;
 }
 
 QTextBlock ShaderEditor::blockAtPosition(int y) const
