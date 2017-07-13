@@ -32,6 +32,7 @@ private slots:
     void on_pushButtonTex_1_pressed();
     void on_pushButtonTex_2_pressed();
     void on_pushButtonTex_3_pressed();
+    void on_toolButtonHelp_pressed();
 
 signals:
     void requestShaderValidation(QString);

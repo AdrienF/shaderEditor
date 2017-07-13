@@ -2,6 +2,7 @@
 
 #include <QFont>
 #include <QDir>
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QPixmap>
 
@@ -17,6 +18,7 @@ UIShaderEditor::UIShaderEditor(QWidget *parent) :
     const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     ui->labelFPS->setFont(fixedFont);
     ui->labelGlobalTime->setFont(fixedFont);
+    ui->toolButtonHelp->setIcon(QIcon(":/Icons/help.png"));
 
     connect(ui->editor, &ShaderEditor::requestShaderValidation, this, &UIShaderEditor::requestShaderValidation);
     connect(ui->pushButtonBuild, &QPushButton::pressed,         [this](){
@@ -127,3 +129,26 @@ void UIShaderEditor::on_pushButtonTex_0_pressed(){ updateTex(0); }
 void UIShaderEditor::on_pushButtonTex_1_pressed(){ updateTex(1); }
 void UIShaderEditor::on_pushButtonTex_2_pressed(){ updateTex(2); }
 void UIShaderEditor::on_pushButtonTex_3_pressed(){ updateTex(3); }
+
+
+void UIShaderEditor::on_toolButtonHelp_pressed()
+{
+    QString helpMessage = "<html>Input data for the shader:<br />";
+    helpMessage += "<br /><code>uniform vec3	   iResolution;</code>  <i>The viewport resolution (z is pixel aspect ratio, usually 1.0)</i>\n";
+    helpMessage += "<br /><code>uniform float	   iGlobalTime;</code>  <i>Current time in seconds - DEPRECATED</i>\n";
+    helpMessage += "<br /><code>uniform float	   iTime;</code>        <i>Current time in seconds</i>\n";
+    helpMessage += "<br /><code>uniform float	   iTimeDelta; </code>  <i>Time it takes to render a frame, in seconds</i>\n";
+    helpMessage += "<br /><code>uniform int	   iFrame;</code>           <i>Current frame</i>\n";
+    helpMessage += "<br /><code>uniform float	   iFrameRate;</code>   <i>Number of frames rendered per second</i>\n";
+    helpMessage += "<br /><code>uniform vec4	   iMouse;</code>       <i>xy = current pixel coords (if LMB is down). zw = click pixel</i>\n";
+    helpMessage += "<br /><code>uniform sampler2D iChannel0;</code>     <i>Sampler for input textures 0</i>\n";
+    helpMessage += "<br /><code>uniform sampler2D iChannel1;</code>     <i>Sampler for input textures 1</i>\n";
+    helpMessage += "<br /><code>uniform sampler2D iChannel2;</code>     <i>Sampler for input textures 2</i>\n";
+    helpMessage += "<br /><code>uniform sampler2D iChannel3;</code>     <i>Sampler for input textures 3</i>\n";
+    helpMessage += "</html>";
+
+    QMessageBox box;
+    box.setText("<html><h1>Shader Editor</h1><br/>This program lets you test fragment shader in live!</html>");
+    box.setInformativeText(helpMessage);
+    box.exec();
+}

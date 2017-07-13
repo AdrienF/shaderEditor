@@ -8,5 +8,6 @@
     </qresource>
     <qresource prefix="/Icons">
         <file alias="croissant.png">data/croissant.png</file>
+        <file alias="help.png">data/help.png</file>
     </qresource>
 </RCC>
