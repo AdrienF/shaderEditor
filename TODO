@@ -6,5 +6,5 @@
 
 == Other
 - remove RenderWidget inclusion (create some shaderValidator class w/ ErrorLog struct)
--integrate libGlsl shaders
+- integrate libGlsl shaders
 - integrate libGlsl engine
