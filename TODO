@@ -4,8 +4,7 @@
 - browse shader toy catalog
 - import shader from ShaderToy
 
-== OpenGL management
-- input Textures
-
 == Other
 - remove RenderWidget inclusion (create some shaderValidator class w/ ErrorLog struct)
+-integrate libGlsl shaders
+- integrate libGlsl engine

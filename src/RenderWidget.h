@@ -62,7 +62,8 @@ private:
 
     //fragment shader uniforms
     GLuint m_iResolutionUniform;
-    GLuint m_iGlobalTimeUniform;
+    GLuint m_iGlobalTimeUniform;    //Will soon be deprecated in ShaderToy
+    GLuint m_iTimeUniform;
     GLuint m_iTimeDeltaUniform;
     GLuint m_iFrameUniform;
     GLuint m_iFrameRateUniform;

@@ -88,7 +88,8 @@ QString RenderWidget::attributes()
     QString s = "";
     // From ShaderToy.com
     s += "uniform vec3	iResolution;";      // image/buffer	The viewport resolution (z is pixel aspect ratio, usually 1.0)
-    s += "uniform float	iGlobalTime;";      // image/sound/buffer	Current time in seconds
+    s += "uniform float	iGlobalTime;";      // image/sound/buffer	Current time in seconds - DEPRECATED
+    s += "uniform float	iTime;";            // image/sound/buffer	Current time in seconds
     s += "uniform float	iTimeDelta;";       // image/buffer	Time it takes to render a frame, in seconds
     s += "uniform int	iFrame;";           // image/buffer	Current frame
     s += "uniform float	iFrameRate;";       // image/buffer	Number of frames rendered per second
@@ -189,6 +190,7 @@ void RenderWidget::getUniforms()
     //fragment shader attributes
     m_iResolutionUniform = m_program->uniformLocation("iResolution");
     m_iGlobalTimeUniform = m_program->uniformLocation("iGlobalTime");;
+    m_iTimeUniform = m_program->uniformLocation("iTime");;
     m_iTimeDeltaUniform = m_program->uniformLocation("iTimeDelta");;
     m_iFrameUniform = m_program->uniformLocation("iFrame");;
     m_iFrameRateUniform = m_program->uniformLocation("iFrameRate");
@@ -222,6 +224,7 @@ void RenderWidget::setUniforms()
     m_program->setUniformValue(m_iFrameUniform,  m_iFrame);
     m_program->setUniformValue(m_iTimeDeltaUniform,  m_iTimeDelta);
     m_program->setUniformValue(m_iGlobalTimeUniform,  m_iGlobalTime);
+    m_program->setUniformValue(m_iTimeUniform,  m_iGlobalTime);
     m_program->setUniformValue(m_iFrameRateUniform,  m_iFrameRate);
 
     for(int i=0; i<m_iTextures.size(); ++i){
