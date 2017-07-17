@@ -1,3 +1,0 @@
-[submodule "Tools"]
-	path = Tools
-	url = ssh://git@10.129.33.18/common/Tools.git
