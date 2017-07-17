@@ -5,7 +5,7 @@ DESTDIR = bin
 OBJECTS_DIR = obj
 MOC_DIR = moc
 UI_DIR = src
-QMAKE_TARGET_COMPANY = GoPro
+QMAKE_TARGET_COMPANY = MyGreatCompany
 
 QT += core gui widgets
 #include(Tools/CommonLibs/defines.pri)
