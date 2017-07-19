@@ -375,22 +375,48 @@ QList<QTextEdit::ExtraSelection> ShaderEditor::highlightErrorLines()
 void ShaderEditor::commentLines()
 {
     QTextCursor currentCursor = textCursor();
-    currentCursor.movePosition(QTextCursor::StartOfLine);
-    //select the first word of the line
-    currentCursor.select(QTextCursor::WordUnderCursor);
-    QString textAtCursor = currentCursor.selectedText();
-    currentCursor.clearSelection();
-
-    //toggle the comment
-    if(textAtCursor.left(2) == "//")
+    if(currentCursor.selectedText().isEmpty())
     {
-        //select the first two characters of the line
+        //---- Toggle comment on the current line
         currentCursor.movePosition(QTextCursor::StartOfLine);
-        currentCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
-        currentCursor.removeSelectedText();
-    }else{
-        currentCursor.movePosition(QTextCursor::StartOfLine);
-        currentCursor.insertText("//");
+        //select the first word of the line
+        currentCursor.select(QTextCursor::WordUnderCursor);
+        QString textAtCursor = currentCursor.selectedText();
+        currentCursor.clearSelection();
+
+        //toggle the comment
+        if(textAtCursor.left(2) == "//")
+        {
+            //select the first two characters of the line
+            currentCursor.movePosition(QTextCursor::StartOfLine);
+            currentCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+            currentCursor.removeSelectedText();
+        }else{
+            currentCursor.movePosition(QTextCursor::StartOfLine);
+            currentCursor.insertText("//");
+        }
+    } else {
+        //---- Toggle comment on the selection
+        QString currentText = "/*";
+        QString anchorText = "*/";
+        int currentPosition = currentCursor.position();
+        int anchorPosition  = currentCursor.anchor();
+        if(currentPosition > anchorPosition)
+        {
+            currentText = "*/";
+            anchorText = "/*";
+            currentCursor.clearSelection();
+            currentCursor.insertText(currentText);
+            currentCursor.setPosition(anchorPosition);
+            currentCursor.insertText(anchorText);
+        }else{
+            currentCursor.clearSelection();
+            currentCursor.setPosition(anchorPosition);
+            currentCursor.insertText(anchorText);
+            currentCursor.setPosition(currentPosition);
+            currentCursor.insertText(currentText);
+        }
+        setTextCursor(currentCursor);
     }
 }
 
