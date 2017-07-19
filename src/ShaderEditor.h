@@ -68,6 +68,8 @@ private:
     void toggleFold(const QTextBlock &block);
 
     void commentLines();
+    void insertTabulation();
+    void cariageReturnIndent();
 
     KSyntaxHighlighting::Repository m_repository;
     KSyntaxHighlighting::SyntaxHighlighter *m_highlighter;

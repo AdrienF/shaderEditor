@@ -30,8 +30,12 @@
 #include <QMenu>
 #include <QPainter>
 #include <QPalette>
+#include <QRegularExpression>
 
 #include <QKeyEvent>
+
+
+#define TABLENGTH 4
 
 class CodeEditorSidebar : public QWidget
 {
@@ -237,7 +241,22 @@ void ShaderEditor::keyPressEvent(QKeyEvent *event)
         }
     }
     else
-        QPlainTextEdit::keyPressEvent(event);
+    {
+        switch(event->key())
+        {
+        case Qt::Key_Tab:
+            //intercept Tab to replace by 4 spaces
+            insertTabulation();
+            break;
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+            //indent new line
+            cariageReturnIndent();
+            break;
+        default:
+            QPlainTextEdit::keyPressEvent(event);
+        }
+    }
 }
 
 void ShaderEditor::setTheme(const KSyntaxHighlighting::Theme &theme)
@@ -418,6 +437,43 @@ void ShaderEditor::commentLines()
         }
         setTextCursor(currentCursor);
     }
+}
+
+void ShaderEditor::insertTabulation()
+{
+    QTextCursor cursor = textCursor();
+    if(cursor.hasSelection())
+        return ;
+    cursor.insertText(QString(" ").repeated(TABLENGTH));
+}
+
+void ShaderEditor::cariageReturnIndent()
+{
+    QTextCursor cursor = textCursor();
+    if(cursor.hasSelection())
+        return ;
+    int pos = cursor.position();
+
+    cursor.movePosition(QTextCursor::StartOfLine);
+    cursor.select(QTextCursor::LineUnderCursor);
+    QString textAtCursor = cursor.selectedText();
+    cursor.clearSelection();
+    int nSpace = textAtCursor.indexOf(QRegularExpression("[^ ]")); //first non-space character position
+    QChar firstChar(' ');
+    if(-1==nSpace)
+    {
+        //previous line has no non-space character
+        nSpace = textAtCursor.lastIndexOf(' ') + 1;
+    }else
+        firstChar = textAtCursor.at(nSpace);
+    if(firstChar == '{')
+        nSpace += TABLENGTH;
+    qDebug() << textAtCursor.replace(' ', '.') << nSpace;
+
+    cursor.setPosition(pos);
+    cursor.insertText("\n");
+    cursor.insertText(QString(" ").repeated(nSpace));
+    setTextCursor(cursor);
 }
 
 QTextBlock ShaderEditor::blockAtPosition(int y) const
