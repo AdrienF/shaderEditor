@@ -14,7 +14,7 @@ ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
 
     QIcon icon(":/Icons/croissant.png");
     setWindowIcon(icon);
-    setOrganizationName("GoPro");
+    setOrganizationName("MyBigCompany");
     setApplicationName("Shader Editor");
 
     ShaderEditor *actualEditor = m_editor->editor();
