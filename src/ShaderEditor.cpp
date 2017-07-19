@@ -227,6 +227,10 @@ void ShaderEditor::keyPressEvent(QKeyEvent *event)
         case Qt::Key_O:
             emit openNewDocument();
             break;
+
+        case Qt::Key_Slash:
+            commentLines();
+            break;
         default:
             QPlainTextEdit::keyPressEvent(event);
             break;
@@ -366,6 +370,28 @@ QList<QTextEdit::ExtraSelection> ShaderEditor::highlightErrorLines()
     }
 
     return extraSelections;
+}
+
+void ShaderEditor::commentLines()
+{
+    QTextCursor currentCursor = textCursor();
+    currentCursor.movePosition(QTextCursor::StartOfLine);
+    //select the first word of the line
+    currentCursor.select(QTextCursor::WordUnderCursor);
+    QString textAtCursor = currentCursor.selectedText();
+    currentCursor.clearSelection();
+
+    //toggle the comment
+    if(textAtCursor.left(2) == "//")
+    {
+        //select the first two characters of the line
+        currentCursor.movePosition(QTextCursor::StartOfLine);
+        currentCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+        currentCursor.removeSelectedText();
+    }else{
+        currentCursor.movePosition(QTextCursor::StartOfLine);
+        currentCursor.insertText("//");
+    }
 }
 
 QTextBlock ShaderEditor::blockAtPosition(int y) const

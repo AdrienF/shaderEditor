@@ -67,6 +67,8 @@ private:
     bool isFolded(const QTextBlock &block) const;
     void toggleFold(const QTextBlock &block);
 
+    void commentLines();
+
     KSyntaxHighlighting::Repository m_repository;
     KSyntaxHighlighting::SyntaxHighlighter *m_highlighter;
     CodeEditorSidebar *m_sideBar;
