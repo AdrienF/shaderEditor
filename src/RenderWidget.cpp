@@ -156,6 +156,7 @@ void RenderWidget::initialize()
     emit buildChanged(m_program->log());
     getUniforms();
     m_timer.restart();
+    m_iFrame = 0;
 }
 
 //! [4]
@@ -193,7 +194,7 @@ void RenderWidget::updateUniforms()
     float deltaSec   = ( elapsedSec -m_iGlobalTime );
     m_iGlobalTime    = elapsedSec;
     m_iTimeDelta     = deltaSec;
-    m_iFrameRate     = 1./deltaSec;
+    m_iFrameRate     = m_iFrame/elapsedSec;
 }
 
 void RenderWidget::setUniforms()
