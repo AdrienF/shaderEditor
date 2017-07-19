@@ -2,7 +2,7 @@
 #define UISHADEREDITOR_H
 
 #include <QTabWidget>
-#include <RenderWidget.h>
+#include <GlslErrorManager.h>
 
 namespace Ui {
 class UIShaderEditor;
@@ -21,11 +21,11 @@ public:
     const QString& documentName() const {return m_filename;}
     void setDocumentName(const QString& docName);
     void openFile(const QString &fileName);
-    void setErrorLines(QVector<RenderWidget::ErrorLog>);
 
 public slots:
     void updateFPS(float);
     void updateGlobalTime(float);
+    void setErrorLines(QVector<GlslErrorManager::ErrorLog>);
 
 private slots:
     void on_pushButtonTex_0_pressed();
@@ -46,7 +46,7 @@ private:
     };
     Ui::UIShaderEditor *ui;
     QString m_filename;
-    QVector<RenderWidget::ErrorLog> m_errorLines;
+    QVector<GlslErrorManager::ErrorLog> m_errorLines;
     QVector<ImageRep> m_textureRep;
 
     void updateErrLog();

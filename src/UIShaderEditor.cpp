@@ -54,7 +54,7 @@ void UIShaderEditor::openFile(const QString& fileName)
    updateErrLog();
 }
 
-void UIShaderEditor::setErrorLines(QVector<RenderWidget::ErrorLog> errLines)
+void UIShaderEditor::setErrorLines(QVector<GlslErrorManager::ErrorLog> errLines)
 {
     m_errorLines = errLines;
     ui->editor->setErrorLines(errLines);

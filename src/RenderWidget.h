@@ -16,18 +16,6 @@ public:
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
 
-    enum ErrorLevel{
-        GLSL_WARNING = 0,
-        GLSL_ERROR = 1
-    };
-    struct ErrorLog{
-        ErrorLevel level;
-        int row;
-        int col;
-        QString log;
-    };
-    //Return the line index (first) and column (second) of lines with errors
-    QVector<ErrorLog> parseLog() const ;
 
 private:
 
@@ -120,8 +108,7 @@ public slots:
     void updateTexture(int idx, QImage img);
 
 signals:
-    void buildFailed();
-    void buildSuccess();
+    void buildChanged(QString);
     void sendFPS(float);
     void sendGlobalTime(float);
 };

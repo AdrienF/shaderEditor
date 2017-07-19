@@ -7,6 +7,7 @@
 #include "ShaderEditor.h"
 #include "RenderWidget.h"
 #include "UIShaderEditor.h"
+#include "GlslErrorManager.h"
 
 class ShaderEditorApp : public QApplication
 {
@@ -23,6 +24,7 @@ private slots:
 private:
     std::unique_ptr<RenderWidget> m_renderer;
     std::unique_ptr<UIShaderEditor> m_editor;
+    std::unique_ptr<GlslErrorManager> m_errorManager;
 };
 
 #endif // SHADEREDITORAPP_H

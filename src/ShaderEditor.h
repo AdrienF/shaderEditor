@@ -22,8 +22,7 @@
 #include <QPlainTextEdit>
 #include <KF5/KSyntaxHighlighting/repository.h>
 
-//TODO : should be removed
-#include "RenderWidget.h"
+#include "GlslErrorManager.h"
 
 namespace KSyntaxHighlighting {
 class SyntaxHighlighter;
@@ -40,7 +39,7 @@ public:
     void openFile(const QString &fileName);
 
     void setDefinition(const QString &defName);
-    void setErrorLines(QVector<RenderWidget::ErrorLog>);
+    void setErrorLines(QVector<GlslErrorManager::ErrorLog>);
 
 signals:
     void requestShaderValidation(QString);
@@ -71,7 +70,7 @@ private:
     KSyntaxHighlighting::Repository m_repository;
     KSyntaxHighlighting::SyntaxHighlighter *m_highlighter;
     CodeEditorSidebar *m_sideBar;
-    QVector<RenderWidget::ErrorLog> m_errorLines;
+    QVector<GlslErrorManager::ErrorLog> m_errorLines;
 };
 
 #endif // SHADEREDITOR_H

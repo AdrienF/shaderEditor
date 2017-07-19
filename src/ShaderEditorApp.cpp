@@ -9,6 +9,7 @@ ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
     : QApplication(argc, argv)
     , m_renderer(new RenderWidget())
     , m_editor(new UIShaderEditor())
+    , m_errorManager(new GlslErrorManager())
 {
 
     QIcon icon(":/Icons/croissant.png");
@@ -18,7 +19,6 @@ ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
 
     ShaderEditor *actualEditor = m_editor->editor();
 
-    connect(m_editor.get(), &UIShaderEditor::requestShaderValidation,  m_renderer.get(), &RenderWidget::rebuildShader);
     connect(actualEditor, &ShaderEditor::saveDocument,      this, &ShaderEditorApp::saveDocument);
     connect(actualEditor, &ShaderEditor::saveDocumentAs,    this, &ShaderEditorApp::saveDocumentAs);
     connect(actualEditor, &ShaderEditor::openNewDocument,   [this](){
@@ -29,12 +29,19 @@ ShaderEditorApp::ShaderEditorApp(int argc, char **argv)
                                                         tr("Fragment shader (*.fsh *.glsl *.frag)"));
         this->m_editor->openFile(fileName);
     });
-    connect(m_renderer.get(), &RenderWidget::buildFailed,   [this](){
-        this->m_editor->setErrorLines(this->m_renderer->parseLog());
-    });
-    connect(m_renderer.get(), &RenderWidget::buildSuccess,   [this](){
-        this->m_editor->setErrorLines(this->m_renderer->parseLog());
-    });
+
+    connect(m_renderer.get(),     &RenderWidget::buildChanged,
+            m_errorManager.get(), &GlslErrorManager::onBuildFinish);
+
+    connect(m_errorManager.get(), &GlslErrorManager::statusUpdate,
+            m_editor.get(),       &UIShaderEditor::setErrorLines);
+
+    connect(m_editor.get(),       &UIShaderEditor::requestShaderValidation,
+            m_errorManager.get(), &GlslErrorManager::onSourceChanged);
+
+    connect(m_errorManager.get(), &GlslErrorManager::rebuildFromSource,
+            m_renderer.get(),     &RenderWidget::rebuildShader);
+
     connect(m_renderer.get(), &RenderWidget::sendFPS,           m_editor.get(), &UIShaderEditor::updateFPS);
     connect(m_renderer.get(), &RenderWidget::sendGlobalTime,    m_editor.get(), &UIShaderEditor::updateGlobalTime);
     connect(m_editor.get(),   &UIShaderEditor::updateTexture,   m_renderer.get(), &RenderWidget::updateTexture);

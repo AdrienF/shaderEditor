@@ -126,7 +126,7 @@ void ShaderEditor::setDefinition(const QString &defName)
     m_highlighter->setDefinition(def);
 }
 
-void ShaderEditor::setErrorLines(QVector<RenderWidget::ErrorLog> errLines)
+void ShaderEditor::setErrorLines(QVector<GlslErrorManager::ErrorLog> errLines)
 {
     m_errorLines = errLines;
     highlightLines();

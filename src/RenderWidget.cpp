@@ -128,28 +128,6 @@ QString RenderWidget::formatFromShaderToy(const QString& content)
     return res;
 }
 
-QVector<RenderWidget::ErrorLog> RenderWidget::parseLog() const
-{
-    const QString log = m_program->log();
-    const int offset = headerOffset();
-    QVector<ErrorLog>res;
-    QStringList lines = log.split('\n');
-    for(const auto & line : lines)
-    {
-        if(line.contains("ERROR"))
-        {
-            ErrorLog errLog;
-            QStringList blocks = line.split(':');
-            errLog.level = GLSL_ERROR;
-            errLog.row = blocks.at(2).toUInt() - offset;
-            errLog.col = 0;//blocks.at(1).at(1).toUInt();
-            errLog.log = blocks.back();
-            res.push_back(errLog);
-        }
-    }
-    return res;
-}
-
 void RenderWidget::initialize()
 {
     m_program.reset( new QOpenGLShaderProgram(this) );
@@ -165,16 +143,17 @@ void RenderWidget::initialize()
         qWarning().noquote() << "Can't compile fragment shader";
         qWarning().noquote() << "Source:" << endl << m_fragmentShader;
         qWarning().noquote() << "Log:" << endl << m_program->log();
-        emit buildFailed();
+        emit buildChanged(m_program->log());
         return;
     }
     if(!m_program->link())
     {
         qWarning() << "Can't link GL program";
         qWarning().noquote() << "Log:" << endl << m_program->log();
+        emit buildChanged(m_program->log());
         return;
     }
-    emit buildSuccess();
+    emit buildChanged(m_program->log());
     getUniforms();
     m_timer.restart();
 }
