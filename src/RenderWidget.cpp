@@ -49,13 +49,13 @@ RenderWidget::RenderWidget()
     m_iChannelResolution[2] = vec3({0,0,0});
     m_iChannelResolution[3] = vec3({0,0,0});
 
-    float   left  = 0.,
-            right  = 1,
-            top    = 1,
-            bottom = 0,
-            far    = 1,
-            near   = -1;
-    m_projMatrix.ortho(left, right, bottom, top, near, far);
+    const float left        =  0.,
+                right       =  1.,
+                top         =  1.,
+                bottom      =  0.,
+                farPlane    =  1.,
+                nearPlane   = -1.;
+    m_projMatrix.ortho(left, right, bottom, top, nearPlane, farPlane);
 
     m_vertexShader   = readFile(":/Shaders/basicShader.vsh");
     m_fragmentShader = attributes() + readFile(":/Shaders/basicShader.fsh");
