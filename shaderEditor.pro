@@ -10,10 +10,12 @@ QMAKE_TARGET_COMPANY = MyGreatCompany
 QT += core gui widgets
 #include(Tools/CommonLibs/defines.pri)
 
-INCLUDEPATH += /usr/local/include/\
-                MOC_DIR
-QMAKE_LIBDIR += /usr/local/lib
-LIBS += -l KF5SyntaxHighlighting
+macx {
+    INCLUDEPATH += /usr/local/include/\
+                    MOC_DIR
+    QMAKE_LIBDIR += /usr/local/lib
+}
+LIBS += -lKF5SyntaxHighlighting
 
 
 SOURCES += src/main.cpp \
