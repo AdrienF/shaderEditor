@@ -22,7 +22,6 @@ SOURCES += src/main.cpp \
     src/ShaderEditorApp.cpp \
     src/openglwindow.cpp \
     src/UIShaderEditor.cpp \
-    src/UIHelp.cpp \
     src/GlslErrorManager.cpp
 
 HEADERS += \
@@ -31,13 +30,11 @@ HEADERS += \
     src/ShaderEditorApp.h \
     src/openglwindow.h \
     src/UIShaderEditor.h \
-    src/UIHelp.h \
     src/GlslErrorManager.h
 
 RESOURCES += \
     assets.qrc
 
 FORMS += \
-    src/UIShaderEditor.ui \
-    src/UIHelp.ui
+    src/UIShaderEditor.ui\
 
