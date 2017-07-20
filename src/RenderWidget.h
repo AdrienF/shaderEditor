@@ -1,6 +1,8 @@
 #ifndef RENDERWIDGET_H
 #define RENDERWIDGET_H
 
+#include <memory>
+
 #include <QWindow>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
