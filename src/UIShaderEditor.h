@@ -2,7 +2,7 @@
 #define UISHADEREDITOR_H
 
 #include <QTabWidget>
-#include <GlslErrorManager.h>
+#include "GlslErrorManager.h"
 
 namespace Ui {
 class UIShaderEditor;
